@@ -1,0 +1,33 @@
+{
+  "main_concern": "Shortness of breath and chest tightness",
+  "onset_duration": "Since Monday (worse with exertion)",
+  "triggers": ["Worse with stairs/exertion"],
+  "what_it_could_mean": "These symptoms can have many causes. Some need urgent evaluation, especially when chest tightness or breathing difficulty is present.",
+  "what_we_found": {
+    "symptoms": ["Shortness of breath", "Chest tightness", "Sweating"],
+    "negatives": ["Denies fever"],
+    "medications": ["Metformin 500 mg twice daily", "Ramipril 5 mg once daily"],
+    "allergies": ["NKDA (no known drug allergies)"],
+    "tests_results": ["ECG: possible ST depression", "Troponin: 0.08 ng/mL"],
+    "vitals": ["BP 168/96", "HR 108", "Temp 37.2°C"]
+  },
+  "next_steps": [
+    "Go to the emergency department now (as documented in the plan).",
+    "Repeat troponin in 3 hours (as planned).",
+    "Confirm aspirin/heparin decisions with the clinical team.",
+    "Follow up with cardiology as advised."
+  ],
+  "questions_to_ask": [
+    "What is the most likely cause of my breathing difficulty and chest tightness?",
+    "What warning signs should make me seek help immediately?",
+    "What tests are still pending, and what do they mean?",
+    "What is my follow-up plan and timeline?"
+  ],
+  "urgent_red_flags": [
+    "Worsening chest pain or pressure",
+    "Severe difficulty breathing",
+    "Fainting or confusion",
+    "Blue lips/face, or new weakness on one side"
+  ],
+  "disclaimer": "This summary is for informational use and does not replace medical advice."
+}

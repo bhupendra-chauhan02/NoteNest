@@ -1,0 +1,7 @@
+Name: John Smith
+DOB: 12/03/1981
+MRN: 883920
+Phone: +49 176 12345678
+Chief Complaint: Chest pain x2d
+Assessment: Possible GERD
+Plan: Trial PPI, follow-up in 2 weeks

@@ -1,0 +1,12 @@
+{
+  "title": "NoteNest Clinician 5C's",
+  "type": "object",
+  "required": ["chief_complaint", "course", "context", "concerns", "coping"],
+  "properties": {
+    "chief_complaint": { "type": "string" },
+    "course": { "type": "array", "items": { "type": "string" } },
+    "context": { "type": "array", "items": { "type": "string" } },
+    "concerns": { "type": "array", "items": { "type": "string" } },
+    "coping": { "type": "array", "items": { "type": "string" } }
+  }
+}

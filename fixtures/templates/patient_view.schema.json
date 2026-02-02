@@ -1,0 +1,35 @@
+{
+  "title": "NoteNest Patient View",
+  "type": "object",
+  "required": [
+    "main_concern",
+    "onset_duration",
+    "what_it_could_mean",
+    "what_we_found",
+    "next_steps",
+    "questions_to_ask",
+    "urgent_red_flags",
+    "disclaimer"
+  ],
+  "properties": {
+    "main_concern": { "type": "string" },
+    "onset_duration": { "type": "string" },
+    "triggers": { "type": "array", "items": { "type": "string" } },
+    "what_it_could_mean": { "type": "string" },
+    "what_we_found": {
+      "type": "object",
+      "properties": {
+        "symptoms": { "type": "array", "items": { "type": "string" } },
+        "negatives": { "type": "array", "items": { "type": "string" } },
+        "medications": { "type": "array", "items": { "type": "string" } },
+        "allergies": { "type": "array", "items": { "type": "string" } },
+        "tests_results": { "type": "array", "items": { "type": "string" } },
+        "vitals": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "next_steps": { "type": "array", "items": { "type": "string" } },
+    "questions_to_ask": { "type": "array", "items": { "type": "string" } },
+    "urgent_red_flags": { "type": "array", "items": { "type": "string" } },
+    "disclaimer": { "type": "string" }
+  }
+}

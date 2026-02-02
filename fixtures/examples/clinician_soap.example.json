@@ -1,0 +1,26 @@
+{
+  "S": [
+    "CC: Chest tightness + SOB",
+    "Duration: x2 days; worse with exertion (stairs)",
+    "Associated: diaphoresis",
+    "Negatives: denies fever"
+  ],
+  "O": [
+    "Vitals: BP 168/96, HR 108, T 37.2",
+    "ECG: possible ST depression",
+    "Troponin: 0.08 ng/mL",
+    "PMH: HTN, DM2",
+    "Meds: metformin, ramipril",
+    "Allergies: NKDA"
+  ],
+  "A": [
+    "Assessment not documented; symptoms concerning for cardiac ischemia given exertional chest tightness + ECG/troponin note."
+  ],
+  "P": [
+    "Send to ED",
+    "Repeat troponin in 3h",
+    "Start ASA",
+    "Consider heparin per protocol",
+    "Cardiology follow-up"
+  ]
+}

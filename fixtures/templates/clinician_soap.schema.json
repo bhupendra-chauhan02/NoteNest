@@ -1,0 +1,11 @@
+{
+  "title": "NoteNest Clinician SOAP",
+  "type": "object",
+  "required": ["S", "O", "A", "P"],
+  "properties": {
+    "S": { "type": "array", "items": { "type": "string" } },
+    "O": { "type": "array", "items": { "type": "string" } },
+    "A": { "type": "array", "items": { "type": "string" } },
+    "P": { "type": "array", "items": { "type": "string" } }
+  }
+}
