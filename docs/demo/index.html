@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <base href="../" />
   <title>NoteNest Demo</title>
-  <link rel="stylesheet" href="assets/styles.css" />
-  <script src="assets/app.js" defer></script>
+  <link rel="icon" href="../favicon.svg" />
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <script src="../assets/app.js" defer></script>
 </head>
 <body>
   <header>
     <div class="container navbar">
-      <a class="brand" href="./">
+      <a class="brand" href="../">
         <span class="brand-badge">NN</span>
         NoteNest
       </a>
       <nav class="nav-links">
-        <a href="./">Home</a>
-        <a href="pricing/">Pricing</a>
-        <a href="demo/">Demo</a>
+        <a href="../">Home</a>
+        <a href="../pricing/">Pricing</a>
+        <a class="active" href="../demo/">Demo</a>
         <a href="https://github.com/Princey9/NoteNest" target="_blank" rel="noreferrer">GitHub</a>
       </nav>
     </div>
@@ -27,54 +27,145 @@
   <main data-demo-root>
     <section class="hero">
       <div class="container hero-content">
-        <span class="badge">Browser-only demo</span>
-        <h1>Run NoteNest logic entirely in your browser.</h1>
-        <p>Paste a note or upload a file to see deterministic redaction and structured summaries. No backend, no uploads.</p>
+        <span class="eyebrow">Browser-only demo</span>
+        <h1>Protect, summarize, and safely share clinical notes.</h1>
+        <p>Switch between NoteNest summaries and Cloak Mode de-identification with deterministic, offline rules.</p>
         <div class="hero-actions">
-          <button class="btn btn-primary" id="convert-btn">Convert</button>
-          <a class="btn btn-secondary" href="https://github.com/Princey9/NoteNest" target="_blank" rel="noreferrer">CLI Docs</a>
+          <button class="btn btn-primary" id="convert-btn">Run demo</button>
+          <a class="btn btn-secondary" href="https://github.com/Princey9/NoteNest/releases/latest" target="_blank" rel="noreferrer">Download latest</a>
         </div>
       </div>
     </section>
 
-    <section>
+    <section class="section">
       <div class="container demo-grid">
         <div class="card">
-          <h3>Input note</h3>
-          <p class="muted">Paste a clinical note or upload a file (.txt, .md, .json).</p>
-          <div class="grid" style="gap: 12px;">
-            <input id="note-file" type="file" accept=".txt,.md,.json" />
-            <textarea id="note-text" placeholder="Name: Jane Doe\nChief Complaint: Shortness of breath\nHPI: Patient reports fatigue and cough.\nMedications: Albuterol, Lisinopril\nAllergies: Penicillin\nPlan: Continue inhaler, follow up in 2 weeks."></textarea>
+          <div class="section-title">
+            <h2>Input note</h2>
+            <p>Paste a note or upload a .txt, .md, or .json file.</p>
           </div>
-          <p class="muted" style="margin-top: 12px;">This demo uses deterministic regex rules; CLI output may differ slightly.</p>
-          <p id="status-output" class="muted" style="color: var(--accent-2);"></p>
+          <div class="field">
+            <label for="note-file">Upload file</label>
+            <input id="note-file" type="file" accept=".txt,.md,.json" />
+          </div>
+          <div class="field">
+            <label for="note-text">Paste text</label>
+            <textarea id="note-text" placeholder="DOB: 01/02/1980
+Chief Complaint: Shortness of breath
+HPI: Patient reports fatigue and cough.
+Assessment: Suspected viral bronchitis.
+Plan: Continue inhaler, follow up in 2 weeks."></textarea>
+          </div>
+          <div class="field">
+            <label for="sample-note">Paste sample messy note</label>
+            <select id="sample-note">
+              <option value="">Select a sample</option>
+              <option value="note1">Messy ER chest pain</option>
+              <option value="note2">Walk-in abdominal pain</option>
+              <option value="note3">Mixed labs + plan</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="placeholder-style">Placeholder style</label>
+            <select id="placeholder-style">
+              <option value="protected" selected>Protected</option>
+              <option value="masked">Masked</option>
+              <option value="hidden">Hidden</option>
+              <option value="removed">Removed</option>
+              <option value="angle">Angle tags</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Clinician format</label>
+            <div class="mode-toggle" role="tablist">
+              <button class="tab-btn" data-clinician="soap" aria-selected="true">SOAP</button>
+              <button class="tab-btn" data-clinician="5cs" aria-selected="false">5C’s</button>
+            </div>
+          </div>
+          <div class="mode-toggle" role="tablist">
+            <button class="tab-btn" data-mode="summarize" aria-selected="true">Summarize &amp; Structure</button>
+            <button class="tab-btn" data-mode="cloak" aria-selected="false">De-identify &amp; Share (Cloak Mode)</button>
+          </div>
+          <div class="hero-actions" style="margin-top: 16px;">
+            <button class="btn btn-primary" id="convert-btn-secondary">Convert</button>
+            <button class="btn btn-secondary" id="clear-btn">Clear</button>
+            <span id="status-output" class="status-pill">Ready</span>
+          </div>
+          <p class="legend">Default style: Protected placeholders (e.g., [EMAIL_PROTECTED]).</p>
         </div>
 
-        <div class="output-panel">
-          <div class="tabs" role="tablist" aria-label="Summary view">
-            <button class="tab-btn" data-tab-button="patient" aria-selected="true" role="tab">Patient view</button>
-            <button class="tab-btn" data-tab-button="clinician" aria-selected="false" role="tab">Clinician view</button>
+        <div class="output-card" data-mode-panel="summarize">
+          <div class="output-header">
+            <div>
+              <h3>Structured summary</h3>
+              <p class="download-note">Patient and clinician views with deterministic rules.</p>
+            </div>
+            <div class="tabs" role="tablist">
+              <button class="tab-btn" data-tab-target="patient" aria-selected="true" role="tab">Patient view</button>
+              <button class="tab-btn" data-tab-target="clinician" aria-selected="false" role="tab">Clinician view</button>
+            </div>
           </div>
+          <div class="output-header">
+            <span></span>
+            <button class="copy-btn" data-copy-target="patient-output">Copy patient</button>
+            <button class="copy-btn" data-copy-target="clinician-output">Copy clinician</button>
+            <button class="copy-btn" data-download-target="patient-output" data-download-name="patient_view.txt">Download txt</button>
+            <button class="copy-btn" data-download-target="clinician-output" data-download-name="clinician_view.txt">Download txt</button>
+          </div>
+          <p class="legend" id="placeholder-legend">Sensitive fields are replaced with placeholders (e.g., [EMAIL_PROTECTED]). You can switch styles (Protected / Masked / Hidden / Removed / &lt;TAG&gt;).</p>
+          <div class="output-block" data-tab-panel="patient" id="patient-output" role="tabpanel">Run the demo to generate a patient-friendly summary.</div>
+          <div class="output-block" data-tab-panel="clinician" id="clinician-output" role="tabpanel" hidden>Run the demo to generate a clinician summary.</div>
+        </div>
 
-          <div class="output-block" data-tab-panel="patient" id="patient-output" role="tabpanel"></div>
-          <div class="output-block" data-tab-panel="clinician" id="clinician-output" role="tabpanel" hidden></div>
+        <div class="output-card" data-mode-panel="summarize">
+          <div class="output-header">
+            <div>
+              <h3>Coverage summary</h3>
+              <p class="download-note">Fields found/missing and protected counts.</p>
+            </div>
+            <button class="copy-btn" data-copy-target="coverage-output">Copy coverage</button>
+          </div>
+          <div class="output-block" id="coverage-output">Run the demo to see coverage details.</div>
+        </div>
 
-          <div>
-            <span class="tag">Redacted note</span>
-            <div class="output-block" id="redacted-output">Redacted note will appear here.</div>
+        <div class="output-card" data-mode-panel="cloak" hidden>
+          <div class="output-header">
+            <div>
+              <h3>PHI scan summary</h3>
+              <p class="download-note">Counts by type plus manual review flags.</p>
+            </div>
+            <button class="copy-btn" data-copy-target="phi-summary">Copy summary</button>
           </div>
-          <div>
-            <span class="tag">Structured summary JSON</span>
-            <div class="output-block" id="json-output">{\n  "chief_complaint": "Not found",\n  "symptoms": ["Not found"],\n  "meds": ["Not found"],\n  "allergies": ["Not found"],\n  "plan": ["Not found"],\n  "follow_up": ["Not found"]\n}</div>
+          <div class="output-block" id="phi-summary">Run the demo to generate PHI scan results.</div>
+          <div class="output-block" id="phi-flags">Manual review flags will appear here.</div>
+        </div>
+
+        <div class="output-card">
+          <div class="output-header">
+            <h3>Protected note</h3>
+            <div class="output-actions">
+              <button class="copy-btn" data-copy-target="protected-output">Copy protected</button>
+              <button class="copy-btn" data-download-target="protected-output" data-download-name="protected_note.txt">Download txt</button>
+            </div>
           </div>
+          <div class="output-block" id="protected-output">Protected output will appear here.</div>
         </div>
       </div>
     </section>
   </main>
 
+  <div class="toast" id="toast" role="alert"></div>
+
   <footer>
     <div class="container footer-grid">
-      <span>NoteNest v0.1 — GitHub Pages Demo</span>
+      <div>
+        <strong>NoteNest</strong> — GitHub Pages Demo
+        <div class="footer-links">
+          <a href="https://princey9.github.io/NoteNest/" target="_blank" rel="noreferrer">Website</a>
+          <a href="https://github.com/Princey9/NoteNest" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/Princey9/NoteNest/releases/latest" target="_blank" rel="noreferrer">Download latest</a>
+        </div>
+      </div>
       <span>Demo pricing — payments not enabled (exam build).</span>
     </div>
   </footer>

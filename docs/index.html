@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NoteNest — Offline Clinical Note Summaries</title>
+  <link rel="icon" href="favicon.svg" />
   <link rel="stylesheet" href="assets/styles.css" />
   <script src="assets/app.js" defer></script>
 </head>
@@ -15,7 +16,7 @@
         NoteNest
       </a>
       <nav class="nav-links">
-        <a href="./">Home</a>
+        <a class="active" href="./">Home</a>
         <a href="pricing/">Pricing</a>
         <a href="demo/">Demo</a>
         <a href="https://github.com/Princey9/NoteNest" target="_blank" rel="noreferrer">GitHub</a>
@@ -26,84 +27,91 @@
   <main>
     <section class="hero">
       <div class="container hero-content">
-        <span class="badge">Offline-first clinical intelligence</span>
-        <h1>Turn raw clinical notes into privacy-safe, shareable summaries in seconds.</h1>
+        <span class="eyebrow">Offline-first health tech</span>
+        <h1>Clinical note prep for understanding and safe sharing.</h1>
         <p>
-          NoteNest turns messy clinical notes into safe, shareable, and useful summaries—offline by default. It redacts personal identifiers, then produces two outputs: a Patient View (plain-language explanation + next-step questions) and a Clinician View (structured SOAP-style summary with key problems, meds, findings, and plan). Designed for real workflows—referrals, second opinions, handoffs, and study—NoteNest helps patients understand their care and helps clinicians act faster, while keeping sensitive data protected.
+          NoteNest is a Clinical Note Prep Toolkit with two modes: Note Understanding (summarize, structure, and explain) and Safe Sharing (Cloak Mode de-identification). It protects sensitive details (names, emails, phone numbers, IDs) using placeholders while keeping clinical meaning intact. Designed for real workflows—referrals, second opinions, handoffs, and study—NoteNest helps patients understand their care and helps clinicians act faster, while keeping sensitive data protected.
         </p>
+        <p class="legend">Default style: Protected placeholders (e.g., [EMAIL_PROTECTED]).</p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="demo/">Try the Demo</a>
-          <a class="btn btn-secondary" href="https://github.com/Princey9/NoteNest" target="_blank" rel="noreferrer">View on GitHub</a>
+          <a class="btn btn-primary" href="https://github.com/Princey9/NoteNest/releases/latest" target="_blank" rel="noreferrer">Download latest</a>
+          <a class="btn btn-secondary" href="demo/">Try the demo</a>
         </div>
       </div>
     </section>
 
-    <section>
+    <section class="section">
       <div class="container">
         <div class="section-title">
-          <h2>Why NoteNest</h2>
-          <p>Designed for offline workflows, fast triage, and safe sharing between clinicians, patients, and care teams.</p>
+          <h2>What NoteNest delivers</h2>
+          <p>Built for clinicians, students, and patients who need compliant, fast, and local workflows.</p>
         </div>
         <div class="grid grid-3">
           <div class="card">
-            <h3>Privacy-first redaction</h3>
-            <p>Deterministic PII removal removes names, phones, emails, and address cues before summaries are generated.</p>
+            <span class="badge">Cloak Mode</span>
+            <h3>Safe sharing & de-identification</h3>
+            <p>Scan, de-identify, and pseudonymize notes with reports and manual review flags.</p>
           </div>
           <div class="card">
-            <h3>Patient-friendly language</h3>
-            <p>Generate a clear, gentle explanation plus questions patients can bring to their next visit.</p>
+            <span class="badge">Note Understanding</span>
+            <h3>Plain-language explanations</h3>
+            <p>Generate clear next steps and questions so patients understand their care.</p>
           </div>
           <div class="card">
-            <h3>Clinician-ready structure</h3>
-            <p>SOAP-style structured output surfaces problems, meds, findings, and plans in a rapid scan.</p>
+            <span class="badge">Clinician-ready</span>
+            <h3>Structured summaries</h3>
+            <p>SOAP-style output highlights chief concerns, findings, assessment, and plan.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section>
+    <section class="section">
       <div class="container">
         <div class="section-title">
-          <h2>Download the CLI</h2>
-          <p>Grab the latest binaries, or open the Releases page if you are unsure about your platform.</p>
+          <h2>Download NoteNest</h2>
+          <p>Access the latest release or grab a direct platform build.</p>
         </div>
-        <div class="downloads">
-          <a href="https://github.com/Princey9/NoteNest/releases/latest" target="_blank" rel="noreferrer">
-            <span>Latest Release (All platforms)</span>
+        <div class="download-grid">
+          <a class="download-item" href="https://github.com/Princey9/NoteNest/releases/latest" target="_blank" rel="noreferrer">
+            <span>Latest release (all platforms)</span>
             <span>→</span>
           </a>
-          <a href="https://github.com/Princey9/NoteNest/releases/latest/download/aarch64-unknown-linux-musl.tar.gz" target="_blank" rel="noreferrer">
+          <a class="download-item" href="https://github.com/Princey9/NoteNest/releases/latest/download/aarch64-unknown-linux-musl.tar.gz" target="_blank" rel="noreferrer">
             <span>Linux aarch64 (static) — required by exam</span>
-            <span>—</span>
+            <span>→</span>
           </a>
-          <div class="muted">Other platforms (bonus)</div>
-          <a href="https://github.com/Princey9/NoteNest/releases/latest/download/x86_64-unknown-linux-musl.tar.gz" target="_blank" rel="noreferrer">
-            <span>Linux x86_64 (static)</span>
-            <span>—</span>
+          <a class="download-item" href="https://github.com/Princey9/NoteNest/releases/latest/download/x86_64-unknown-linux-musl.tar.gz" target="_blank" rel="noreferrer">
+            <span>Linux x86_64 (static) — bonus</span>
+            <span>→</span>
           </a>
         </div>
-        <p class="muted" style="margin-top: 16px;">If you don’t know your platform, open the Releases page.</p>
+        <p class="download-note">If you do not know your platform, open the Releases page.</p>
       </div>
     </section>
 
-    <section>
+    <section class="section">
       <div class="container">
         <div class="section-title">
-          <h2>How it works</h2>
-          <p>Three quick steps for compliant summaries that stay on your machine.</p>
+          <h2>Offline-first workflow</h2>
+          <p>Use the CLI or the browser demo with zero paid APIs and deterministic output.</p>
         </div>
-        <div class="grid grid-3">
+        <div class="grid grid-2">
           <div class="card">
-            <h3>1. Import a note</h3>
-            <p>Paste a note, upload a file, or stream from stdin in the CLI.</p>
+            <h3>1. Ingest</h3>
+            <p>Paste or upload a note. The CLI supports stdin, files, and batch folders.</p>
           </div>
           <div class="card">
-            <h3>2. Redact + structure</h3>
-            <p>PII patterns are removed before deterministic heuristics organize the note.</p>
+            <h3>2. Protect + summarize</h3>
+            <p>Identifiers are masked before structured summaries are generated.</p>
           </div>
           <div class="card">
-            <h3>3. Share outputs</h3>
-            <p>Deliver patient-friendly summaries and clinician views as txt, md, or json.</p>
+            <h3>3. Share safely</h3>
+            <p>Export patient and clinician views in txt, md, or json formats.</p>
+          </div>
+          <div class="card">
+            <h3>4. Stay local</h3>
+            <p>No cloud calls required. Notes stay on-device for privacy and compliance.</p>
           </div>
         </div>
       </div>
@@ -112,7 +120,14 @@
 
   <footer>
     <div class="container footer-grid">
-      <span>NoteNest v0.1 — GitHub Pages Demo</span>
+      <div>
+        <strong>NoteNest</strong> — GitHub Pages Demo
+        <div class="footer-links">
+          <a href="https://princey9.github.io/NoteNest/" target="_blank" rel="noreferrer">Website</a>
+          <a href="https://github.com/Princey9/NoteNest" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/Princey9/NoteNest/releases/latest" target="_blank" rel="noreferrer">Download latest</a>
+        </div>
+      </div>
       <span>Demo pricing — payments not enabled (exam build).</span>
     </div>
   </footer>
