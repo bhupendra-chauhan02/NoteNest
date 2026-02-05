@@ -301,3 +301,7 @@ git push origin v0.2.0
 
 ## About section suggestion (GitHub)
 NoteNest — offline clinical note prep toolkit with protected placeholders, patient view, clinician SOAP/5C’s, and Cloak Mode scans. Live demo: https://princey9.github.io/NoteNest/
+
+## Business
+- Lean Canvas: business/LEAN_CANVAS.md
+- Pitch one-pager: business/PITCH_ONE_PAGER.md
