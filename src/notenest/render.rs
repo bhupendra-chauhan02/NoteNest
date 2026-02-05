@@ -53,14 +53,15 @@ pub fn render_coverage(report: &CoverageReport) -> String {
     );
 
     format!(
-        "Coverage summary\n- fields_found: {}\n- missing: {}\n- protected_counts: {}",
+        "Coverage summary\n- fields_found: {}\n- missing: {}\n- protected_counts: {}\n- confidence: {}",
         report.fields_found,
         if report.fields_missing.is_empty() {
             "none".to_string()
         } else {
             report.fields_missing.join(", ")
         },
-        protected_counts
+        protected_counts,
+        report.confidence
     )
 }
 
@@ -95,6 +96,13 @@ pub fn build_coverage_report(summary: &SummaryResult, counts: &RedactionCounts) 
         fields_found: found,
         fields_missing: missing,
         protected_counts: counts.clone(),
+        confidence: if found >= 8 {
+            "HIGH".to_string()
+        } else if found >= 5 {
+            "MED".to_string()
+        } else {
+            "LOW".to_string()
+        },
     }
 }
 
@@ -163,35 +171,54 @@ fn what_you_came_in_with(view: &PatientView) -> Vec<String> {
     if view.onset_duration != "Not found" {
         lines.push(format!("Duration: {}", view.onset_duration));
     }
-    if !(view.triggers.is_empty() || (view.triggers.len() == 1 && view.triggers[0] == "Not found"))
-    {
-        lines.push(format!("Triggers: {}", view.triggers.join("; ")));
-    }
+    lines.push(format!(
+        "Symptoms: {}",
+        list_or_not_stated(&view.what_we_found.symptoms)
+    ));
+    lines.push(format!(
+        "Negatives: {}",
+        list_or_not_stated(&view.what_we_found.negatives)
+    ));
     lines
 }
 
 fn what_we_found(view: &PatientView) -> Vec<String> {
-    let mut lines = Vec::new();
-    lines.push(format!(
-        "Symptoms: {}",
-        view.what_we_found.symptoms.join("; ")
-    ));
-    lines.push(format!(
-        "Negatives: {}",
-        view.what_we_found.negatives.join("; ")
-    ));
-    lines.push(format!(
-        "Medications: {}",
-        view.what_we_found.medications.join("; ")
-    ));
-    lines.push(format!(
-        "Allergies: {}",
-        view.what_we_found.allergies.join("; ")
-    ));
-    lines.push(format!(
-        "Tests/results: {}",
-        view.what_we_found.tests_results.join("; ")
-    ));
-    lines.push(format!("Vitals: {}", view.what_we_found.vitals.join("; ")));
-    lines
+    vec![
+        format!(
+            "Conditions: {}",
+            list_or_not_stated(&view.what_we_found.conditions)
+        ),
+        format!(
+            "Medications: {}",
+            list_or_none_detected(&view.what_we_found.medications)
+        ),
+        format!(
+            "Allergies: {}",
+            list_or_not_stated(&view.what_we_found.allergies)
+        ),
+        format!(
+            "Vitals: {}",
+            list_or_none_detected(&view.what_we_found.vitals)
+        ),
+        format!(
+            "Tests/results: {}",
+            list_or_none_detected(&view.what_we_found.tests_results)
+        ),
+    ]
+}
+
+fn list_or_not_stated(list: &[String]) -> String {
+    if list.len() == 1 && list[0] == "Not found" {
+        "Not stated".to_string()
+    } else {
+        list.join("; ")
+    }
+}
+
+fn list_or_none_detected(list: &[String]) -> String {
+    if list.len() == 1 && list[0] == "Not found" {
+        "(none detected)".to_string()
+    } else {
+        list.join("; ")
+    }
 }

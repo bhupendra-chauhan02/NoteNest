@@ -9,7 +9,17 @@ Links: GitHub Repo: https://github.com/Princey9/NoteNest | Live Site: https://pr
 ## How to view diagrams
 - GitHub renders Mermaid automatically in Markdown.
 - In VS Code: open the Markdown Preview (View → Command Palette → “Markdown: Open Preview”).
-- If Mermaid doesn’t render in VS Code, install the extension “Markdown Preview Mermaid Support”.
+- If Mermaid does not render in VS Code, install the extension "Markdown Preview Mermaid Support".
+
+## Diagrams / Mermaid
+- GitHub renders Mermaid diagrams automatically in Markdown.
+- For local previews in VS Code, install a Mermaid extension (e.g., "Markdown Preview Mermaid Support").
+- Alternatively, use GitHub.dev (press `.` in the repo) or paste the diagram code into https://mermaid.live.
+
+Verification checklist:
+- Open this file on GitHub and confirm diagrams render.
+- Open VS Code preview and confirm diagrams render (with extension installed).
+- If not, paste Mermaid code into mermaid.live.
 
 ## Diagram: Lean Canvas map
 ```mermaid
@@ -112,22 +122,20 @@ flowchart TB
 ```mermaid
 flowchart LR
   A[Input messy note] --> B[Choose mode]
-  B --> S1[Summarize & structure]
-  B --> C1[Cloak Mode]
-  S1 --> S2[Protect placeholders]
-  S2 --> S3[Extract fields]
-  S3 --> S4[Render Patient + Clinician View (SOAP/5C’s)]
-  S4 --> Z[Export/share (offline)]
+  B --> C[Summarize and structure]
+  B --> D[Cloak Mode]
+  C --> E[Protect placeholders]
+  E --> F[Extract fields]
+  F --> G[Render Patient and Clinician View with SOAP and 5Cs]
+  G --> H[Export and share offline]
+  D --> I[Protect placeholders]
+  I --> J[Cloak scan summary]
+  J --> K[Cloak report in JSON and CSV]
+  K --> H
+  H --> N[Offline only, no network calls]
 
-  C1 --> C2[Protect placeholders]
-  C2 --> C3[Cloak scan summary]
-  C3 --> C4[Cloak report (JSON/CSV)]
-  C4 --> Z
-
-  N[Offline-only. No network calls.]:::note
-  Z --- N
-
-  classDef focus fill:#22d3ee,stroke:#0f172a,stroke-width:2px,color:#0f172a;
-  class S1,S2,C1,C2 focus;
   classDef note fill:#f1f5f9,stroke:#64748b,stroke-width:1px,color:#0f172a;
+  class N note;
 ```
+
+Troubleshooting Mermaid: GitHub renders Mermaid automatically. For local previews in VS Code, install a Mermaid preview extension.

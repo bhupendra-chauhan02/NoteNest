@@ -6,6 +6,7 @@
   "what_we_found": {
     "symptoms": ["Shortness of breath", "Chest tightness", "Sweating"],
     "negatives": ["Denies fever"],
+    "conditions": ["HTN", "DM2"],
     "medications": ["Metformin 500 mg twice daily", "Ramipril 5 mg once daily"],
     "allergies": ["NKDA (no known drug allergies)"],
     "tests_results": ["ECG: possible ST depression", "Troponin: 0.08 ng/mL"],

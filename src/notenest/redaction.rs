@@ -7,7 +7,7 @@ static EMAIL_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}").unwrap());
 
 static PHONE_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?i)\b(?:\+?\d[\d\s().-]{6,}\d)\b").unwrap());
+    Lazy::new(|| Regex::new(r"(?i)(?:\+?\d[\d\s().-]{7,}\d)\b").unwrap());
 
 static DOB_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(
@@ -24,11 +24,11 @@ static NAME_RE: Lazy<Regex> = Lazy::new(|| {
 });
 
 static ADDRESS_LABEL_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?i)\b(Address|Addr)\s*[:\-]?\s*.*").unwrap());
+    Lazy::new(|| Regex::new(r"(?i)\b(Address|Addr)\s*[:\-]?\s*[^\n.]*").unwrap());
 
 static ADDRESS_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(
-        r"\b\d{1,5}\s+[A-Za-z0-9.'-]+(?:\s+[A-Za-z0-9.'-]+){0,4}\s+(Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Way|Place|Pl|Strasse|Str)\b",
+        r"\b\d{1,5}\s+[A-Za-z0-9.'-]+(?:\s+[A-Za-z0-9.'-]+){0,4}\s+(Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Way|Place|Pl|Strasse|Str)\b(?:\s+\d{4,5})?",
     )
     .unwrap()
 });
@@ -109,11 +109,49 @@ pub fn redact_note(input: &str, style: PlaceholderStyle) -> RedactionResult {
         })
         .into_owned();
 
+    redacted = cleanup_placeholders(&redacted, style);
+
     RedactionResult {
         redacted_text: redacted,
         counts,
         style,
     }
+}
+
+fn cleanup_placeholders(text: &str, style: PlaceholderStyle) -> String {
+    let mut cleaned = text.to_string();
+    let phone_token = placeholder("PHONE", style);
+    let email_token = placeholder("EMAIL", style);
+    let id_token = placeholder("ID", style);
+    let dob_token = placeholder("DOB", style);
+    let addr_token = placeholder("ADDRESS", style);
+    let name_token = placeholder("NAME", style);
+
+    for token in [
+        &phone_token,
+        &email_token,
+        &id_token,
+        &dob_token,
+        &addr_token,
+        &name_token,
+    ] {
+        let plus_pattern = Regex::new(&format!(r"\\+\\s*{}", regex::escape(token))).unwrap();
+        cleaned = plus_pattern
+            .replace_all(&cleaned, token.as_str())
+            .to_string();
+        let trailing_digits = Regex::new(&format!(r"{}\\d+", regex::escape(token))).unwrap();
+        cleaned = trailing_digits
+            .replace_all(&cleaned, token.as_str())
+            .to_string();
+    }
+
+    let space_re = Regex::new(r"[ \t]{2,}").unwrap();
+    cleaned = space_re.replace_all(&cleaned, " ").to_string();
+    cleaned = cleaned
+        .replace(" ,", ",")
+        .replace(" .", ".")
+        .replace(" ;", ";");
+    cleaned
 }
 
 #[cfg(test)]

@@ -67,6 +67,7 @@ pub struct SummaryResult {
     pub chief_concern: Vec<String>,
     pub duration: Vec<String>,
     pub symptoms: Vec<String>,
+    pub negatives: Vec<String>,
     pub pmh: Vec<String>,
     pub meds: Vec<String>,
     pub allergies: Vec<String>,
@@ -85,6 +86,7 @@ pub struct SummaryResult {
 pub struct PatientFound {
     pub symptoms: Vec<String>,
     pub negatives: Vec<String>,
+    pub conditions: Vec<String>,
     pub medications: Vec<String>,
     pub allergies: Vec<String>,
     pub tests_results: Vec<String>,
@@ -130,6 +132,7 @@ pub struct CoverageReport {
     pub fields_found: usize,
     pub fields_missing: Vec<String>,
     pub protected_counts: RedactionCounts,
+    pub confidence: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
