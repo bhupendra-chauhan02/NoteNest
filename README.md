@@ -44,6 +44,16 @@ Open http://localhost:8001/
 
 ---
 
+## Diagrams / Mermaid
+- GitHub renders Mermaid diagrams automatically in Markdown.
+- For local previews in VS Code, install a Mermaid extension (e.g., "Markdown Preview Mermaid Support").
+- Alternatively, use GitHub.dev (press `.` in the repo) or paste the diagram code into https://mermaid.live.
+
+Verification checklist:
+- Open README on GitHub and confirm diagrams render.
+- Open VS Code preview and confirm diagrams render (with extension installed).
+- If not, paste Mermaid code into mermaid.live.
+
 ## How it works (offline pipeline)
 
 ```mermaid

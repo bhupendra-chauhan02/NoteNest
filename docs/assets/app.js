@@ -128,20 +128,34 @@
     btn.dataset.copyLabel = btn.textContent;
     btn.addEventListener('click', async () => {
       const targetId = btn.dataset.copyTarget;
-      const targetEl = demoRoot.querySelector(`#${targetId}`);
+      const targetEl = document.getElementById(targetId);
       if (!targetEl) {
+        showToast('Copy target not found.');
         return;
       }
 
       const text = targetEl.textContent || '';
       try {
-        await navigator.clipboard.writeText(text);
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const temp = document.createElement('textarea');
+          temp.value = text;
+          temp.setAttribute('readonly', 'true');
+          temp.style.position = 'absolute';
+          temp.style.left = '-9999px';
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          temp.remove();
+        }
         btn.textContent = 'Copied';
+        showToast('Copied to clipboard.');
         setTimeout(() => {
           btn.textContent = btn.dataset.copyLabel || 'Copy';
         }, 1200);
       } catch (error) {
-        showToast('Copy failed.');
+        showToast('Copy failed. Try selecting text manually.');
       }
     });
   });
@@ -202,7 +216,7 @@
     {
       key: 'phone',
       kind: 'PHONE',
-      regex: /(?:\+?\d{1,2}\s*)?(?:\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}/g,
+      regex: /(?:\+?\d[\d\s().-]{7,}\d)/g,
     },
     {
       key: 'dob',
@@ -213,13 +227,13 @@
     {
       key: 'address_label',
       kind: 'ADDRESS',
-      regex: /\bAddress\s*[:\-].*/gi,
+      regex: /\b(Address|Addr)\s*[:\-].*/gi,
       labelText: 'Address',
     },
     {
       key: 'address',
       kind: 'ADDRESS',
-      regex: /\b\d{1,5}\s+[A-Za-z0-9.'-]+(?:\s+[A-Za-z0-9.'-]+){0,4}\s+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Way|Place|Pl)\b/gi,
+      regex: /\b\d{1,5}\s+[A-Za-z0-9.'-]+(?:\s+[A-Za-z0-9.'-]+){0,4}\s+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Way|Place|Pl|Strasse|Str|Straße)\b(?:\s+\d{4,5})?/gi,
     },
     {
       key: 'id',
@@ -234,6 +248,45 @@
     },
   ];
 
+  const cleanupProtected = (text, style) => {
+    const tokens = ['PHONE', 'EMAIL', 'ID', 'DOB', 'ADDRESS', 'NAME'].map((kind) =>
+      placeholderToken(kind, style)
+    );
+    let cleaned = text;
+    tokens.forEach((token) => {
+      cleaned = cleaned.replace(new RegExp(`\\+\\s*${token.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}`, 'g'), token);
+      cleaned = cleaned.replace(new RegExp(`${token.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\d+`, 'g'), token);
+    });
+    cleaned = cleaned.replace(/[ \t]{2,}/g, ' ').replace(/ ,/g, ',').replace(/ \\./g, '.').replace(/ ;/g, ';');
+    return cleaned;
+  };
+
+  const normalizeInput = (text) => {
+    const lines = text.split(/\r?\n/);
+    const cleaned = [];
+    lines.forEach((raw) => {
+      let line = raw.trim();
+      if (!line) return;
+      line = line.replace(/^[0-9]{1,2}:[0-9]{2}\s*/, '');
+      line = line.replace(/triage note\s*[-—]*/i, '').trim();
+      if (/do not share|random footer|copied template|template text/i.test(line)) return;
+      if (/^[-.]{5,}$/.test(line)) return;
+      line = line.replace(/[?!.,]{2,}/g, (m) => m[0]);
+      if (line) cleaned.push(line);
+    });
+    return cleaned.join('\n');
+  };
+
+  const normalizeMedString = (value) => {
+    return value
+      .replace(/pmh/gi, '')
+      .replace(/\bmeds?\b[:\-]?\s*/i, '')
+      .replace(/([A-Za-z])(\d)/g, '$1 $2')
+      .replace(/(\d)(bid|tid|od|qd|qhs|prn)\b/gi, '$1 $2')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  };
+
   const protectText = (text, style) => {
     const counts = {
       name: 0,
@@ -245,7 +298,7 @@
       other: 0,
     };
 
-    let protectedText = text;
+    let protectedText = normalizeInput(text);
     protectionRules.forEach((rule) => {
       protectedText = protectedText.replace(rule.regex, (match, label) => {
         if (rule.key === 'address_label' || rule.key === 'address') {
@@ -266,6 +319,8 @@
         return token;
       });
     });
+
+    protectedText = cleanupProtected(protectedText, style);
 
     const flags = [];
     if (/(\d{8,})/.test(text)) {
@@ -292,7 +347,50 @@
     return cleaned.length ? cleaned : ['Not found'];
   };
 
+  const listOrNotStated = (items) => {
+    if (items.length === 1 && items[0] === 'Not found') {
+      return 'Not stated';
+    }
+    return items.join('; ');
+  };
+
+  const listOrNoneDetected = (items) => {
+    if (items.length === 1 && items[0] === 'Not found') {
+      return '(none detected)';
+    }
+    return items.join('; ');
+  };
+
   const normalizeString = (value) => (value && value.trim() ? value.trim() : 'Not found');
+
+  const isMedicationCandidate = (value, medsContext) => {
+    const lower = value.toLowerCase();
+    if (/nkda|no known drug allergies/.test(lower)) {
+      return false;
+    }
+    if (/\b(htn|dm2|diabetes|cad|copd|ckd|asthma)\b/.test(lower)
+      && !/\b(mg|mcg|g|ml)\b/i.test(lower)
+      && !/\b(bid|tid|qid|od|qd|qhs|prn)\b/i.test(lower)
+    ) {
+      return false;
+    }
+    if (/\b(bp|hr|rr|temp|t|spo2|spo 2|sat|o2|pulse)\b/.test(lower)) {
+      return false;
+    }
+    if (/\b(trop|troponin|ecg|ekg|cxr|ct|mri|cbc|bmp|crp|wbc|hba1c|ng\/ml|mmol\/l|mg\/dl)\b/.test(lower)) {
+      return false;
+    }
+    if (/\[(email|phone|id|dob|address|name)_/i.test(value)) {
+      return false;
+    }
+    if (/\b(mg|mcg|g|ml)\b/i.test(lower) || /\b(bid|tid|qid|od|qd|qhs|prn)\b/i.test(lower)) {
+      return true;
+    }
+    if (medsContext && /[a-z]{2,}/i.test(lower)) {
+      return true;
+    }
+    return false;
+  };
 
   const extractSummary = (text) => {
     const summary = {
@@ -316,18 +414,58 @@
       .filter(Boolean);
 
     const durationRe = /\b(x\s?\d+\s?(d|day|days|w|wk|week|weeks|mo|month|months)|for\s+\d+\s?(d|day|days|w|wk|week|weeks|mo|month|months)|since\s+\w+|started\s+last\s+\w+)\b/i;
-    const vitalRe = /\b(BP\s?\d{2,3}\/\d{2,3}|HR\s?\d{2,3}|RR\s?\d{2,3}|T\s?\d{2}\.?\d?|Temp\s?\d{2}\.?\d?|SpO2\s?\d{2,3})\b/i;
-    const testRe = /\b(ecg|ekg|trop|troponin|crp|hba1c|labs?|ct|cxr|x-ray)\b/i;
+    const vitalRe = /\b(BP\s?\d{2,3}\/\d{2,3}|HR\s?\d{2,3}|RR\s?\d{2,3}|T\s?\d{2}\.?\d?|Temp\s?\d{2}\.?\d?|SpO2\s?\d{2,3}%?|O2\s*sat\s?\d{2,3}%?|sat\s?\d{2,3}%?)\b/i;
+    const testRe = /\b(ecg|ekg|trop|troponin|crp|hba1c|labs?|ct|cxr|x-ray|wbc)\b/i;
     const medRe = /\b(meds?|taking|metformin|ramipril|lisinopril|amlodipine|ibu|ibuprofen|asa)\b/i;
     const allergyRe = /\b(nkda|allergy|allergies|penicillin)\b/i;
-    const symptomRe = /\b(sob|shortness of breath|breathe|breathing|dyspnea|cp|chest pain|tightness|abdo pain|abdominal pain|fatigue|nausea|vomiting|diarrhea|cough|fever|dizzy|dizziness|headache)\b/gi;
+    const symptomRe = /\b(sob|shortness of breath|breathe|breathing|dyspnea|cp|chest pain|tightness|abdo pain|abdominal pain|fatigue|nausea|vomiting|diarrhea|cough|fever|dizzy|dizziness|headache|insomnia|anxiety|depression|stress|sleep)\b/gi;
+    const phiRe = /\b(contact|phone|email|mrn|dob|id)\b|\[(EMAIL|PHONE|ID|DOB|ADDRESS)_/i;
+    const addressRe = /\b(addr|address|street|strasse|str)\b|\[ADDRESS_/i;
+    const planRe = /\bplan\b/i;
+    const repeatRe = /\brepeat\s+trop/i;
+
+    const normalizeVital = (token) => {
+      const lower = token.toLowerCase();
+      const spoMatch = lower.match(/\b(spo2|spo\s*2|o2\s*sat|sat)\s*[:\-]?\s*(\d{2,3})%?/i);
+      if (spoMatch) {
+        return `SpO2 ${spoMatch[2]}%`;
+      }
+      if (/^temp/i.test(token)) {
+        return token.replace(/temp/i, 'T').replace(/\s+/, ' ');
+      }
+      if (/^(bp|hr|rr|t)\s*\d/i.test(lower)) {
+        const idx = token.search(/\d/);
+        if (idx > 0) {
+          return `${token.slice(0, idx).trim().toUpperCase()} ${token.slice(idx).trim()}`;
+        }
+      }
+      return token.trim();
+    };
+
+    const parseTests = (line) => {
+      const tests = [];
+      if (/\b(trop|troponin)\b/i.test(line)) {
+        const match = line.match(/\b(trop|troponin)\b\s*[:=]?\s*([0-9.]+\s*\w+\/?\w*)/i);
+        if (match) {
+          tests.push(`Troponin: ${match[2].trim()}`);
+        }
+      }
+      if (/\b(ecg|ekg)\b/i.test(line)) {
+        tests.push('ECG: noted');
+      }
+      if (tests.length === 0 && testRe.test(line)) {
+        tests.push(line.trim());
+      }
+      return tests;
+    };
 
     const extractSymptoms = (line) => {
       const hits = [];
       let match;
       while ((match = symptomRe.exec(line)) !== null) {
         const token = match[0].toLowerCase();
-        const normalized = token === 'sob' ? 'shortness of breath'
+        const normalized = token === 'sob' || token === 'breathe' || token === 'breathing' || token === 'dyspnea'
+          ? 'shortness of breath'
           : token === 'cp' ? 'chest pain'
           : token === 'abdo pain' ? 'abdominal pain'
           : token;
@@ -353,6 +491,35 @@
       return false;
     };
 
+    const splitMedsAllergies = (value) => {
+      const lower = value.toLowerCase();
+      const result = { meds: [], allergies: [] };
+      if (/\bmeds?\b/.test(lower)) {
+        const medsPart = value.split(/allerg(?:y|ies)/i)[0];
+        const cleaned = normalizeMedString(medsPart).replace(/[.;!]+$/, '').trim();
+        if (cleaned) {
+          cleaned.split(/[+,/]| and /i).forEach((chunk) => {
+            const trimmed = normalizeMedString(chunk.trim());
+            if (trimmed && isMedicationCandidate(trimmed, true)) {
+              result.meds.push(trimmed);
+            }
+          });
+        } else if (/none|nkda/i.test(lower)) {
+          result.meds.push('None reported');
+        }
+      }
+      if (/allerg(?:y|ies)\b/i.test(lower)) {
+        const allergyPart = value.split(/allerg(?:y|ies)/i)[1] || '';
+        const cleaned = allergyPart.replace(/[:\-]/g, '').replace(/[.;!]+$/, '').trim();
+        if (/nkda/i.test(lower) || /no known drug allergies/i.test(lower)) {
+          result.allergies.push('No known drug allergies');
+        } else if (cleaned) {
+          result.allergies.push(cleaned);
+        }
+      }
+      return result;
+    };
+
     for (const line of lines) {
       if (setFromHeading('chiefConcern', line, /^(Chief Complaint|Chief Concern|CC|Reason for Visit)[:\-]/i)) {
         continue;
@@ -362,9 +529,14 @@
       }
 
       if (current === 'plan') {
-        const cleaned = line.replace(/^[-*\d.]+\s*/, '').trim();
+        const cleaned = line.replace(/^[-*>\u2022\d.]+\s*/, '').trim();
         if (cleaned) {
-          summary.plan.push(cleaned);
+          cleaned.split(/[;]+|&&/).forEach((item) => {
+            const entry = item.trim();
+            if (entry) {
+              summary.plan.push(entry);
+            }
+          });
         }
         continue;
       }
@@ -380,27 +552,42 @@
       }
 
       if (/denies/i.test(line)) {
-        summary.negatives.push(line);
+        const match = line.match(/denies\s+([^.;]+)/i);
+        if (match && match[1]) {
+          summary.negatives.push(`Denies ${match[1].trim().replace(/[.;!]+$/, '')}`);
+        }
       }
+
+      const isPhiLine = phiRe.test(line) || addressRe.test(line);
+      const isPlanLine = planRe.test(line);
+      const planSplit = line.split(/\\bplan\\b/i);
+      const lineNoPlan = planSplit[0] ? planSplit[0].trim() : line;
 
       const vitals = line.match(vitalRe);
-      if (vitals) {
-        summary.vitals.push(vitals[0]);
+      if (vitals && !isPhiLine) {
+        summary.vitals.push(normalizeVital(vitals[0]));
       }
 
-      if (testRe.test(line)) {
-        summary.tests.push(line);
+      if (testRe.test(lineNoPlan) && !isPhiLine && !repeatRe.test(line) && !vitalRe.test(line)) {
+        summary.tests.push(...parseTests(lineNoPlan));
       }
 
-      if (medRe.test(line)) {
-        summary.meds.push(line);
+      if (medRe.test(lineNoPlan)) {
+        const split = splitMedsAllergies(lineNoPlan);
+        split.meds.forEach((med) => {
+          if (isMedicationCandidate(med, true)) {
+            summary.meds.push(med);
+          }
+        });
+        summary.allergies.push(...split.allergies);
       }
 
-      if (allergyRe.test(line)) {
-        if (/nkda/i.test(line) || /no known drug allergies/i.test(line)) {
-          summary.allergies = ['NKDA'];
-        } else {
-          summary.allergies.push(line);
+      if (allergyRe.test(lineNoPlan)) {
+        const split = splitMedsAllergies(lineNoPlan);
+        if (split.allergies.length) {
+          summary.allergies.push(...split.allergies);
+        } else if (/nkda/i.test(lineNoPlan) || /no known drug allergies/i.test(lineNoPlan)) {
+          summary.allergies = ['No known drug allergies'];
         }
       }
 
@@ -424,6 +611,7 @@
     summary.vitals = normalizeList(summary.vitals);
     summary.tests = normalizeList(summary.tests);
     summary.plan = normalizeList(summary.plan);
+    summary.plan = dedupeList(summary.plan);
     summary.context = normalizeList(summary.context);
     summary.concerns = normalizeList(summary.concerns);
     summary.coping = normalizeList(summary.coping);
@@ -431,8 +619,27 @@
     if (summary.chiefConcern[0] === 'Not found' && summary.symptoms[0] !== 'Not found') {
       summary.chiefConcern = [summary.symptoms[0]];
     }
+    if (summary.symptoms.includes('shortness of breath') && summary.symptoms.includes('chest tightness')) {
+      summary.symptoms = summary.symptoms.filter((item) => item !== 'shortness of breath' && item !== 'chest tightness');
+      summary.symptoms.unshift('Shortness of breath with chest tightness');
+    } else if (summary.symptoms.includes('shortness of breath')) {
+      summary.symptoms = summary.symptoms.map((item) => (item === 'shortness of breath' ? 'Shortness of breath' : item));
+    }
 
     return summary;
+  };
+
+  const dedupeList = (items) => {
+    const seen = new Set();
+    const out = [];
+    items.forEach((item) => {
+      const key = item.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(item);
+      }
+    });
+    return out.length ? out : ['Not found'];
   };
 
   const buildPatientView = (summary) => {
@@ -440,7 +647,9 @@
       ? summary.chiefConcern.join('; ')
       : summary.symptoms[0] !== 'Not found'
         ? summary.symptoms.join('; ')
-        : 'Symptoms not clearly stated';
+        : summary.context[0] !== 'Not found'
+          ? summary.context.join('; ')
+          : 'Symptoms not clearly stated';
 
     const triggers = summary.symptoms.filter((item) => /worse|stairs|exertion/i.test(item));
 
@@ -482,18 +691,20 @@
   const buildClinicianViews = (summary) => {
     const soap = {
       S: normalizeList([
-        summary.chiefConcern[0] !== 'Not found' ? `CC: ${summary.chiefConcern.join('; ')}` : 'CC: Not found',
-        summary.duration[0] !== 'Not found' ? `Duration: ${summary.duration.join('; ')}` : 'Duration: Not found',
-        summary.symptoms[0] !== 'Not found' ? `Symptoms: ${summary.symptoms.join('; ')}` : 'Symptoms: Not found',
+        summary.chiefConcern[0] !== 'Not found' ? `CC: ${summary.chiefConcern.join('; ')}` : 'CC: Not stated',
+        summary.duration[0] !== 'Not found' ? `Duration: ${summary.duration.join('; ')}` : 'Duration: Not stated',
+        summary.symptoms[0] !== 'Not found' ? `Symptoms: ${summary.symptoms.join('; ')}` : 'Symptoms: Not stated',
       ]),
       O: normalizeList([
-        summary.vitals[0] !== 'Not found' ? `Vitals: ${summary.vitals.join('; ')}` : 'Vitals: Not found',
-        summary.tests[0] !== 'Not found' ? `Tests: ${summary.tests.join('; ')}` : 'Tests: Not found',
-        summary.meds[0] !== 'Not found' ? `Meds: ${summary.meds.join('; ')}` : 'Meds: Not found',
-        summary.allergies[0] !== 'Not found' ? `Allergies: ${summary.allergies.join('; ')}` : 'Allergies: Not found',
+        summary.vitals[0] !== 'Not found' ? `Vitals: ${summary.vitals.join('; ')}` : 'Vitals: (none detected)',
+        summary.tests[0] !== 'Not found' ? `Tests: ${summary.tests.join('; ')}` : 'Tests: (none detected)',
+        summary.meds[0] !== 'Not found' ? `Meds: ${summary.meds.join('; ')}` : 'Meds: (none detected)',
+        summary.allergies[0] !== 'Not found' ? `Allergies: ${summary.allergies.join('; ')}` : 'Allergies: Not stated',
       ]),
       A: normalizeList(['Assessment not explicitly stated.']),
-      P: normalizeList(summary.plan),
+      P: normalizeList(
+        summary.plan[0] !== 'Not found' ? summary.plan : ['Not stated']
+      ),
     };
 
     const fiveCs = {
@@ -501,7 +712,9 @@
       course: normalizeList(summary.duration),
       context: normalizeList(summary.context),
       concerns: normalizeList(summary.concerns),
-      coping: normalizeList(summary.coping),
+      coping: normalizeList(
+        summary.coping[0] !== 'Not found' ? summary.coping : ['Not stated']
+      ),
     };
 
     return { soap, fiveCs };
@@ -516,16 +729,15 @@
     const cameIn = [
       `Main concern: ${patient.main_concern}`,
       patient.onset_duration !== 'Not found' ? `Duration: ${patient.onset_duration}` : null,
-      patient.triggers[0] !== 'Not found' ? `Triggers: ${patient.triggers.join('; ')}` : null,
     ].filter(Boolean);
 
     const found = [
-      `Symptoms: ${patient.what_we_found.symptoms.join('; ')}`,
-      `Negatives: ${patient.what_we_found.negatives.join('; ')}`,
-      `Medications: ${patient.what_we_found.medications.join('; ')}`,
-      `Allergies: ${patient.what_we_found.allergies.join('; ')}`,
-      `Tests/results: ${patient.what_we_found.tests_results.join('; ')}`,
-      `Vitals: ${patient.what_we_found.vitals.join('; ')}`,
+      `Symptoms: ${listOrNotStated(patient.what_we_found.symptoms)}`,
+      `Negatives: ${listOrNotStated(patient.what_we_found.negatives)}`,
+      `Medications: ${listOrNoneDetected(patient.what_we_found.medications)}`,
+      `Allergies: ${listOrNotStated(patient.what_we_found.allergies)}`,
+      `Tests/results: ${listOrNoneDetected(patient.what_we_found.tests_results)}`,
+      `Vitals: ${listOrNoneDetected(patient.what_we_found.vitals)}`,
     ];
 
     return [
@@ -706,6 +918,16 @@
     }
     if (phiFlags) {
       phiFlags.textContent = 'Manual review flags will appear here.';
+    }
+    if (placeholderLegend && placeholderSelect) {
+      updateLegend(placeholderSelect.value);
+    }
+    copyButtons.forEach((btn) => {
+      btn.textContent = btn.dataset.copyLabel || 'Copy';
+    });
+    if (toast) {
+      toast.textContent = '';
+      toast.classList.remove('is-visible');
     }
     lastClinicianViews = null;
   };
